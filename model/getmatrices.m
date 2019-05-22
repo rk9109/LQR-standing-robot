@@ -1,4 +1,4 @@
-function [A, B, C, D] = getmatrices(L, R, M_w, M_b)
+function [A, B, C, D, E] = getmatrices(L, R, M_w, M_b)
 % Return state-space matrices for balancing robot
 %    input:   L    | length
 %             R    | wheel radius
@@ -19,32 +19,24 @@ B_m = 0.1;  % friction damping ratio
 I_w = (1/2)*M_w*R^2;     % wheel moment of inertia
 I_b = (1/3)*M_b*(2*L)^2; % body moment of inertia
 
-% intermediate matrices
-E = [I_w+(M_w+M_b)*R^2   M_b*R*L     ;  
-     M_b*R*L             I_b+M_b*L^2];
-
-F = [B_y+B_m   -B_m ;
-     -B_m       B_m];
-
-G = [0   0      ;
-     0   -M_b*g*L];
-
-H = [1; -1];
-
 % state-space matrices
-A_11 = [0 0; 0 0];
-A_21 = [1 0; 0 1];
-A_12 = -E\G;
-A_22 = -E\F;
-A = [A_11 A_21; A_12 A_22];
+E = [1   0   0                 0           ;
+     0   1   0                 0           ;
+     0   0   I_w+(M_w+M_b)*R^2 M_b*R*L     ;
+     0   0   M_b*R*L           I_b+M_b*L^2];
 
-B_1 = [0; 0];
-B_2 = -E\H;
-B = [B_1; B_2];
+A = [0   0         1        0;
+     0   0         0        1;
+     0   0        -B_y-B_m  B_m ;
+     0   M_b*g*L   B_m     -B_m];
+ 
+B = [0; 0; -1; 1];
 
-C = eye(4);
-
+C = [R  0  0  0;
+     0  1  0  0;
+     0  0  R  0;
+     0  0  0  1];
+ 
 D = 0;
 
 end
-
